@@ -36,6 +36,13 @@ export default defineType({
       description: 'Detailed description of the product'
     }),
     defineField({
+      name: 'instructions',
+      title: 'Instructions',
+      type: 'array',
+      of: [{type: 'block'}],
+      description: 'How to use or set up the product'
+    }),
+    defineField({
       name: 'image',
       title: 'Product Image',
       type: 'image',
