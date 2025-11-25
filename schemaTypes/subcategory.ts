@@ -58,6 +58,27 @@ export default defineType({
       ]
     }),
     defineField({
+      name: 'images',
+      title: 'Product Images',
+      type: 'array',
+      of: [
+        {
+          type: 'image',
+          options: {
+            hotspot: true,
+          },
+          fields: [
+            {
+              name: 'alt',
+              type: 'string',
+              title: 'Alternative Text',
+            }
+          ]
+        }
+      ],
+      description: 'Upload multiple product images for gallery display'
+    }),
+    defineField({
       name: 'deliveryOptions',
       title: 'Delivery Options',
       type: 'array',
