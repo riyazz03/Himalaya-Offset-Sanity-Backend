@@ -100,6 +100,12 @@ export default defineType({
       }
     }),
     defineField({
+      name: 'googleImage',
+      title: 'Google Profile Image URL',
+      type: 'string',
+      hidden: true
+    }),
+    defineField({
       name: 'role',
       title: 'User Role',
       type: 'string',
