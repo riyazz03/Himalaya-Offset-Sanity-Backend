@@ -62,6 +62,12 @@ export default defineType({
       type: 'string'
     }),
     defineField({
+      name: 'image',
+      title: 'Profile Picture URL',
+      type: 'string',
+      description: 'URL to profile picture (from Google or uploaded)'
+    }),
+    defineField({
       name: 'emailVerified',
       title: 'Email Verified',
       type: 'boolean',
@@ -88,20 +94,6 @@ export default defineType({
     defineField({
       name: 'googleId',
       title: 'Google ID',
-      type: 'string',
-      hidden: true
-    }),
-    defineField({
-      name: 'image',
-      title: 'Profile Picture',
-      type: 'image',
-      options: {
-        hotspot: true
-      }
-    }),
-    defineField({
-      name: 'googleImage',
-      title: 'Google Profile Image URL',
       type: 'string',
       hidden: true
     }),
@@ -136,13 +128,13 @@ export default defineType({
       firstName: 'firstName',
       lastName: 'lastName',
       email: 'email',
-      media: 'image'
+      image: 'image'
     },
-    prepare({firstName, lastName, email, media}) {
+    prepare({firstName, lastName, email, image}) {
       return {
         title: `${firstName} ${lastName || ''}`.trim(),
         subtitle: email,
-        media: media
+        media: image
       }
     }
   }
