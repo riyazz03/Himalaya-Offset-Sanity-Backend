@@ -127,14 +127,12 @@ export default defineType({
     select: {
       firstName: 'firstName',
       lastName: 'lastName',
-      email: 'email',
-      image: 'image'
+      email: 'email'
     },
-    prepare({firstName, lastName, email, image}) {
+    prepare({firstName, lastName, email}) {
       return {
         title: `${firstName} ${lastName || ''}`.trim(),
-        subtitle: email,
-        media: image
+        subtitle: email
       }
     }
   }
