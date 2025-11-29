@@ -15,8 +15,8 @@ export default defineType({
     defineField({
       name: 'lastName',
       title: 'Last Name',
-      type: 'string',
-      validation: (Rule) => Rule.required()
+      type: 'string'
+      // Not required - will use firstName if empty
     }),
     defineField({
       name: 'email',
@@ -62,7 +62,7 @@ export default defineType({
       type: 'string'
     }),
     defineField({
-      name: 'isVerified',
+      name: 'emailVerified',
       title: 'Email Verified',
       type: 'boolean',
       initialValue: false
@@ -92,7 +92,7 @@ export default defineType({
       hidden: true
     }),
     defineField({
-      name: 'avatar',
+      name: 'image',
       title: 'Profile Picture',
       type: 'image',
       options: {
@@ -130,11 +130,11 @@ export default defineType({
       firstName: 'firstName',
       lastName: 'lastName',
       email: 'email',
-      media: 'avatar'
+      media: 'image'
     },
     prepare({firstName, lastName, email, media}) {
       return {
-        title: `${firstName} ${lastName}`,
+        title: `${firstName} ${lastName || ''}`.trim(),
         subtitle: email,
         media: media
       }
