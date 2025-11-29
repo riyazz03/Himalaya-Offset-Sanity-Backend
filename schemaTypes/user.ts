@@ -7,8 +7,14 @@ export default defineType({
   type: 'document',
   fields: [
     defineField({
-      name: 'name',
-      title: 'Full Name',
+      name: 'firstName',
+      title: 'First Name',
+      type: 'string',
+      validation: (Rule) => Rule.required()
+    }),
+    defineField({
+      name: 'lastName',
+      title: 'Last Name',
       type: 'string',
       validation: (Rule) => Rule.required()
     }),
@@ -29,6 +35,31 @@ export default defineType({
       title: 'Password Hash',
       type: 'string',
       hidden: true // Hide from studio UI
+    }),
+    defineField({
+      name: 'company',
+      title: 'Company',
+      type: 'string'
+    }),
+    defineField({
+      name: 'address',
+      title: 'Address',
+      type: 'string'
+    }),
+    defineField({
+      name: 'city',
+      title: 'City',
+      type: 'string'
+    }),
+    defineField({
+      name: 'state',
+      title: 'State',
+      type: 'string'
+    }),
+    defineField({
+      name: 'pincode',
+      title: 'Pincode',
+      type: 'string'
     }),
     defineField({
       name: 'isVerified',
@@ -79,13 +110,34 @@ export default defineType({
         ]
       },
       initialValue: 'customer'
+    }),
+    defineField({
+      name: 'createdAt',
+      title: 'Created At',
+      type: 'datetime',
+      initialValue: () => new Date().toISOString(),
+      readOnly: true
+    }),
+    defineField({
+      name: 'updatedAt',
+      title: 'Updated At',
+      type: 'datetime',
+      readOnly: true
     })
   ],
   preview: {
     select: {
-      title: 'name',
-      subtitle: 'email',
+      firstName: 'firstName',
+      lastName: 'lastName',
+      email: 'email',
       media: 'avatar'
+    },
+    prepare({firstName, lastName, email, media}) {
+      return {
+        title: `${firstName} ${lastName}`,
+        subtitle: email,
+        media: media
+      }
     }
   }
 })
