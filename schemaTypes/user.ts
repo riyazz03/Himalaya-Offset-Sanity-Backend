@@ -93,17 +93,8 @@ export default defineType({
     }),
     defineField({
       name: 'image',
-      title: 'Profile Picture',
-      type: 'image',
-      options: {
-        hotspot: true
-      }
-    }),
-    defineField({
-      name: 'googleImage',
-      title: 'Google Profile Image URL',
-      type: 'string',
-      hidden: true
+      title: 'Profile Picture URL',
+      type: 'string'
     }),
     defineField({
       name: 'role',
