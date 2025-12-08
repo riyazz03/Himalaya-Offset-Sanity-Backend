@@ -28,91 +28,8 @@ export default defineType({
       to: [{type: 'category'}],
       validation: (Rule) => Rule.required()
     }),
-    defineField({
-      name: 'description',
-      title: 'Product Description',
-      type: 'array',
-      of: [{type: 'block'}],
-      description: 'Detailed description of the product'
-    }),
-    defineField({
-      name: 'instructions',
-      title: 'Instructions',
-      type: 'array',
-      of: [{type: 'block'}],
-      description: 'How to use or set up the product'
-    }),
-    defineField({
-      name: 'image',
-      title: 'Product Image',
-      type: 'image',
-      options: {
-        hotspot: true,
-      },
-      fields: [
-        {
-          name: 'alt',
-          type: 'string',
-          title: 'Alternative Text',
-        }
-      ]
-    }),
-    defineField({
-      name: 'images',
-      title: 'Product Images',
-      type: 'array',
-      of: [
-        {
-          type: 'image',
-          options: {
-            hotspot: true,
-          },
-          fields: [
-            {
-              name: 'alt',
-              type: 'string',
-              title: 'Alternative Text',
-            }
-          ]
-        }
-      ],
-      description: 'Upload multiple product images for gallery display'
-    }),
-    defineField({
-      name: 'deliveryOptions',
-      title: 'Delivery Options',
-      type: 'array',
-      of: [
-        {
-          type: 'object',
-          fields: [
-            {
-              name: 'type',
-              title: 'Delivery Type',
-              type: 'string',
-              options: {
-                list: [
-                  {title: 'Standard', value: 'standard'},
-                  {title: 'Same Day Delivery', value: 'same_day'},
-                  {title: 'Express', value: 'express'}
-                ]
-              }
-            },
-            {
-              name: 'description',
-              title: 'Description',
-              type: 'string'
-            },
-            {
-              name: 'locations',
-              title: 'Available Locations',
-              type: 'string'
-            }
-          ]
-        }
-      ]
-    }),
-    // NEW: Quantity-based pricing tiers (define quantity brackets first)
+    
+    // QUANTITY TIERS (Base prices only)
     defineField({
       name: 'quantityTiers',
       title: 'Quantity Tiers',
@@ -127,7 +44,7 @@ export default defineType({
               name: 'label',
               title: 'Tier Label',
               type: 'string',
-              description: 'e.g., "1-499", "500-999", "1000-4999", "5000+"',
+              description: 'e.g., "1000", "2000", "3000", "5000", "10000"',
               validation: (Rule) => Rule.required()
             },
             {
@@ -140,26 +57,22 @@ export default defineType({
               name: 'maxQuantity',
               title: 'Maximum Quantity',
               type: 'number',
-              description: 'Leave empty for unlimited'
+              description: 'Leave empty for unlimited (e.g., 10000+ with no max)'
             },
             {
               name: 'basePrice',
-              title: 'Base Price Per Unit',
+              title: 'Base Price Per Card',
               type: 'number',
-              validation: (Rule) => Rule.required().min(0)
-            },
-            {
-              name: 'discount',
-              title: 'Discount Percentage',
-              type: 'number',
-              description: 'e.g., 0, 10, 15, 20'
+              validation: (Rule) => Rule.required().min(0),
+              description: 'e.g., 5 rupees per card'
             }
           ]
         }
       ],
       description: 'Define quantity brackets and their base prices'
     }),
-    // UPDATED: Product options with quantity-dependent values
+
+    // PRODUCT OPTIONS WITH TIER-DEPENDENT MODIFIERS
     defineField({
       name: 'productOptions',
       title: 'Product Options',
@@ -171,23 +84,11 @@ export default defineType({
           title: 'Option',
           fields: [
             {
-              name: 'optionType',
-              title: 'Option Type',
-              type: 'string',
-              options: {
-                list: [
-                  {title: 'Dropdown', value: 'dropdown'},
-                  {title: 'Radio', value: 'radio'},
-                  {title: 'Checkbox', value: 'checkbox'},
-                  {title: 'Number Input', value: 'number'}
-                ]
-              }
-            },
-            {
               name: 'label',
               title: 'Option Label',
               type: 'string',
-              description: 'e.g., "Corners", "Color", "Number of Pages"'
+              description: 'e.g., "Corner Radius", "Front & Back Printing", "Lamination"',
+              validation: (Rule) => Rule.required()
             },
             {
               name: 'isRequired',
@@ -195,149 +96,81 @@ export default defineType({
               type: 'boolean',
               initialValue: false
             },
-            // NEW: Quantity-dependent option values
+            
+            // THIS IS THE KEY: Option values with different prices per tier
             {
               name: 'values',
-              title: 'Option Values by Quantity Tier',
+              title: 'Option Values (with price per tier)',
               type: 'array',
               of: [
                 {
                   type: 'object',
-                  name: 'quantityDependentValue',
+                  name: 'optionValue',
                   fields: [
                     {
-                      name: 'quantityTierRef',
-                      title: 'Quantity Tier',
+                      name: 'label',
+                      title: 'Option Label',
                       type: 'string',
-                      description: 'Select the quantity tier this applies to',
+                      description: 'e.g., "Yes", "No", "2mm", "3mm", etc.',
                       validation: (Rule) => Rule.required()
                     },
                     {
-                      name: 'values',
-                      title: 'Available Values for This Tier',
+                      name: 'value',
+                      title: 'Value ID',
+                      type: 'string',
+                      description: 'Unique identifier (no spaces)',
+                      validation: (Rule) => Rule.required()
+                    },
+                    
+                    // THIS IS THE MAGIC: Different price per tier
+                    {
+                      name: 'priceByTier',
+                      title: 'Price Per Card (by Quantity Tier)',
                       type: 'array',
                       of: [
                         {
                           type: 'object',
                           fields: [
                             {
-                              name: 'label',
-                              title: 'Value Label',
+                              name: 'tierLabel',
+                              title: 'Quantity Tier',
                               type: 'string',
-                              description: 'e.g., "Rounded", "Square", "Red", "Blue"'
+                              description: 'e.g., "1000", "2000", "5000" - must match tier labels above',
+                              validation: (Rule) => Rule.required()
                             },
                             {
-                              name: 'value',
-                              title: 'Value',
-                              type: 'string'
-                            },
-                            {
-                              name: 'priceModifier',
-                              title: 'Price Modifier',
+                              name: 'pricePerCard',
+                              title: 'Price Per Card (₹)',
                               type: 'number',
-                              description: 'Additional cost for this option (can be negative)'
+                              description: 'e.g., 2 for corner radius at 1000 quantity',
+                              validation: (Rule) => Rule.required().min(0)
                             }
                           ]
                         }
-                      ]
+                      ],
+                      description: 'Set different prices for this option at each quantity tier'
                     }
                   ]
                 }
-              ],
-              hidden: ({parent}) => parent?.optionType === 'number'
-            },
-            {
-              name: 'numberConfig',
-              title: 'Number Input Configuration',
-              type: 'object',
-              fields: [
-                {
-                  name: 'min',
-                  title: 'Minimum Value',
-                  type: 'number'
-                },
-                {
-                  name: 'max',
-                  title: 'Maximum Value',
-                  type: 'number'
-                },
-                {
-                  name: 'step',
-                  title: 'Step',
-                  type: 'number',
-                  initialValue: 1
-                },
-                {
-                  name: 'pricePerUnit',
-                  title: 'Price Per Unit',
-                  type: 'number'
-                }
-              ],
-              hidden: ({parent}) => parent?.optionType !== 'number'
+              ]
             }
           ]
         }
       ]
     }),
-    defineField({
-      name: 'specifications',
-      title: 'Specifications',
-      type: 'array',
-      of: [
-        {
-          type: 'object',
-          fields: [
-            {
-              name: 'label',
-              title: 'Specification Name',
-              type: 'string'
-            },
-            {
-              name: 'value',
-              title: 'Specification Value',
-              type: 'string'
-            }
-          ]
-        }
-      ]
-    }),
+
     defineField({
       name: 'minOrderQuantity',
       title: 'Minimum Order Quantity',
       type: 'number',
       initialValue: 1
     }),
-    defineField({
-      name: 'sortOrder',
-      title: 'Sort Order',
-      type: 'number',
-      initialValue: 0
-    }),
+
     defineField({
       name: 'isActive',
       title: 'Is Active',
       type: 'boolean',
       initialValue: true
-    }),
-    defineField({
-      name: 'isFeatured',
-      title: 'Featured Product?',
-      type: 'boolean',
-      initialValue: false
     })
-  ],
-  preview: {
-    select: {
-      title: 'name',
-      media: 'image',
-      category: 'category.name'
-    },
-    prepare({title, media, category}) {
-      return {
-        title,
-        subtitle: category,
-        media
-      }
-    }
-  }
+  ]
 })
