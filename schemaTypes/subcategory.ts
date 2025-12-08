@@ -112,6 +112,54 @@ export default defineType({
         }
       ]
     }),
+    // NEW: Quantity-based pricing tiers (define quantity brackets first)
+    defineField({
+      name: 'quantityTiers',
+      title: 'Quantity Tiers',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          name: 'quantityTier',
+          title: 'Quantity Tier',
+          fields: [
+            {
+              name: 'label',
+              title: 'Tier Label',
+              type: 'string',
+              description: 'e.g., "1-499", "500-999", "1000-4999", "5000+"',
+              validation: (Rule) => Rule.required()
+            },
+            {
+              name: 'minQuantity',
+              title: 'Minimum Quantity',
+              type: 'number',
+              validation: (Rule) => Rule.required().min(1)
+            },
+            {
+              name: 'maxQuantity',
+              title: 'Maximum Quantity',
+              type: 'number',
+              description: 'Leave empty for unlimited'
+            },
+            {
+              name: 'basePrice',
+              title: 'Base Price Per Unit',
+              type: 'number',
+              validation: (Rule) => Rule.required().min(0)
+            },
+            {
+              name: 'discount',
+              title: 'Discount Percentage',
+              type: 'number',
+              description: 'e.g., 0, 10, 15, 20'
+            }
+          ]
+        }
+      ],
+      description: 'Define quantity brackets and their base prices'
+    }),
+    // UPDATED: Product options with quantity-dependent values
     defineField({
       name: 'productOptions',
       title: 'Product Options',
@@ -147,30 +195,51 @@ export default defineType({
               type: 'boolean',
               initialValue: false
             },
+            // NEW: Quantity-dependent option values
             {
               name: 'values',
-              title: 'Option Values',
+              title: 'Option Values by Quantity Tier',
               type: 'array',
               of: [
                 {
                   type: 'object',
+                  name: 'quantityDependentValue',
                   fields: [
                     {
-                      name: 'label',
-                      title: 'Value Label',
+                      name: 'quantityTierRef',
+                      title: 'Quantity Tier',
                       type: 'string',
-                      description: 'e.g., "Rounded", "Square", "Red", "Blue"'
+                      description: 'Select the quantity tier this applies to',
+                      validation: (Rule) => Rule.required()
                     },
                     {
-                      name: 'value',
-                      title: 'Value',
-                      type: 'string'
-                    },
-                    {
-                      name: 'priceModifier',
-                      title: 'Price Modifier',
-                      type: 'number',
-                      description: 'Additional cost for this option (can be negative)'
+                      name: 'values',
+                      title: 'Available Values for This Tier',
+                      type: 'array',
+                      of: [
+                        {
+                          type: 'object',
+                          fields: [
+                            {
+                              name: 'label',
+                              title: 'Value Label',
+                              type: 'string',
+                              description: 'e.g., "Rounded", "Square", "Red", "Blue"'
+                            },
+                            {
+                              name: 'value',
+                              title: 'Value',
+                              type: 'string'
+                            },
+                            {
+                              name: 'priceModifier',
+                              title: 'Price Modifier',
+                              type: 'number',
+                              description: 'Additional cost for this option (can be negative)'
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
@@ -205,56 +274,6 @@ export default defineType({
                 }
               ],
               hidden: ({parent}) => parent?.optionType !== 'number'
-            }
-          ]
-        }
-      ]
-    }),
-    defineField({
-      name: 'pricingTiers',
-      title: 'Pricing Tiers',
-      type: 'array',
-      of: [
-        {
-          type: 'object',
-          name: 'pricingTier',
-          title: 'Pricing Tier',
-          fields: [
-            {
-              name: 'quantity',
-              title: 'Quantity',
-              type: 'number',
-              validation: (Rule) => Rule.required().min(1)
-            },
-            {
-              name: 'price',
-              title: 'Total Price',
-              type: 'number',
-              validation: (Rule) => Rule.required().min(0)
-            },
-            {
-              name: 'pricePerUnit',
-              title: 'Price Per Unit',
-              type: 'number',
-              validation: (Rule) => Rule.required().min(0)
-            },
-            {
-              name: 'savingsPercentage',
-              title: 'Savings Percentage',
-              type: 'number',
-              description: 'Discount percentage for this tier'
-            },
-            {
-              name: 'isRecommended',
-              title: 'Recommended?',
-              type: 'boolean',
-              initialValue: false
-            },
-            {
-              name: 'badge',
-              title: 'Badge Text',
-              type: 'string',
-              description: 'e.g., "15% savings", "Most Popular"'
             }
           ]
         }
