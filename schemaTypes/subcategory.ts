@@ -5,7 +5,6 @@ export default defineType({
   title: 'Subcategory/Product',
   type: 'document',
   fields: [
-    // ============ BASIC INFO ============
     defineField({
       name: 'name',
       title: 'Product Name',
@@ -29,8 +28,6 @@ export default defineType({
       to: [{type: 'category'}],
       validation: (Rule) => Rule.required()
     }),
-
-    // ============ DESCRIPTION & MEDIA ============
     defineField({
       name: 'description',
       title: 'Product Description',
@@ -81,8 +78,6 @@ export default defineType({
       ],
       description: 'Upload multiple product images for gallery display'
     }),
-
-    // ============ DELIVERY OPTIONS ============
     defineField({
       name: 'deliveryOptions',
       title: 'Delivery Options',
@@ -117,8 +112,6 @@ export default defineType({
         }
       ]
     }),
-
-    // ============ QUANTITY TIERS (Base prices only) ============
     defineField({
       name: 'quantityTiers',
       title: 'Quantity Tiers',
@@ -133,7 +126,7 @@ export default defineType({
               name: 'label',
               title: 'Tier Label',
               type: 'string',
-              description: 'e.g., "1000", "2000", "3000", "5000", "10000"',
+              description: 'e.g., "1000", "2000", "5000"',
               validation: (Rule) => Rule.required()
             },
             {
@@ -146,20 +139,19 @@ export default defineType({
               name: 'maxQuantity',
               title: 'Maximum Quantity',
               type: 'number',
-              description: 'Leave empty for unlimited (e.g., 10000+ with no max)'
+              description: 'Leave empty for unlimited'
             },
             {
               name: 'basePrice',
               title: 'Base Price Per Card',
               type: 'number',
-              validation: (Rule) => Rule.required().min(0),
-              description: 'e.g., 5 rupees per card'
+              validation: (Rule) => Rule.required().min(0)
             },
             {
               name: 'savingsPercentage',
               title: 'Savings Percentage',
               type: 'number',
-              description: 'Discount percentage for this tier'
+              description: 'Discount percentage (0-100). Options will auto-scale by this.'
             },
             {
               name: 'badge',
@@ -175,11 +167,8 @@ export default defineType({
             }
           ]
         }
-      ],
-      description: 'Define quantity brackets and their base prices. Options prices will be added on top of these base prices.'
+      ]
     }),
-
-    // ============ PRODUCT OPTIONS WITH TIER-DEPENDENT PRICING ============
     defineField({
       name: 'productOptions',
       title: 'Product Options',
@@ -194,7 +183,7 @@ export default defineType({
               name: 'label',
               title: 'Option Label',
               type: 'string',
-              description: 'e.g., "Lamination", "Corner Cut", "Printing Type"',
+              description: 'e.g., "Lamination", "Corner Cut", "Printing"',
               validation: (Rule) => Rule.required()
             },
             {
@@ -203,9 +192,9 @@ export default defineType({
               type: 'string',
               options: {
                 list: [
+                  {title: 'Radio (Pick One)', value: 'radio'},
+                  {title: 'Checkbox (Multiple)', value: 'checkbox'},
                   {title: 'Dropdown', value: 'dropdown'},
-                  {title: 'Radio', value: 'radio'},
-                  {title: 'Checkbox', value: 'checkbox'},
                   {title: 'Number Input', value: 'number'}
                 ]
               }
@@ -216,11 +205,9 @@ export default defineType({
               type: 'boolean',
               initialValue: false
             },
-            
-            // ===== OPTION VALUES WITH TIER-DEPENDENT PRICES =====
             {
               name: 'values',
-              title: 'Option Values (with price per tier)',
+              title: 'Option Values',
               type: 'array',
               of: [
                 {
@@ -229,20 +216,25 @@ export default defineType({
                   fields: [
                     {
                       name: 'label',
-                      title: 'Option Label',
+                      title: 'Value Label',
                       type: 'string',
-                      description: 'e.g., "Yes", "No", "Laminated", "Non-Laminated", "Rounded", "Straight", "Front Only", "Front & Back"',
+                      description: 'e.g., "Yes", "No", "Glossy", "Matte"',
                       validation: (Rule) => Rule.required()
                     },
                     {
                       name: 'value',
                       title: 'Value ID',
                       type: 'string',
-                      description: 'Unique identifier (no spaces, use hyphens)',
+                      description: 'Unique identifier',
                       validation: (Rule) => Rule.required()
                     },
-                    
-                    // ===== THIS IS THE KEY: Different price per quantity tier =====
+                    {
+                      name: 'basePrice',
+                      title: 'Base Price Per Card (₹)',
+                      type: 'number',
+                      description: 'Price added to base. Will auto-scale per tier.',
+                      initialValue: 0
+                    },
                     {
                       name: 'priceByTier',
                       title: 'Price Per Card (by Quantity Tier)',
@@ -255,28 +247,22 @@ export default defineType({
                               name: 'tierLabel',
                               title: 'Quantity Tier',
                               type: 'string',
-                              description: 'Reference to quantity tier label above (e.g., "1000", "2000", "5000") - must match exactly',
-                              validation: (Rule) => Rule.required()
+                              description: 'Must match tier label above'
                             },
                             {
-                              name: 'pricePerCard',
+                              name: 'price',
                               title: 'Price Per Card (₹)',
-                              type: 'number',
-                              description: 'Additional cost for this option at this quantity tier (e.g., +2 for lamination at 1000 quantity)',
-                              validation: (Rule) => Rule.required().min(0)
+                              type: 'number'
                             }
                           ]
                         }
-                      ],
-                      description: 'Set different prices for this option value at each quantity tier. Leave empty to auto-sync from quantity tiers defined above.'
+                      ]
                     }
                   ]
                 }
               ],
               hidden: ({parent}) => parent?.optionType === 'number'
             },
-
-            // ===== NUMBER INPUT CONFIG =====
             {
               name: 'numberConfig',
               title: 'Number Input Configuration',
@@ -285,7 +271,8 @@ export default defineType({
                 {
                   name: 'min',
                   title: 'Minimum Value',
-                  type: 'number'
+                  type: 'number',
+                  initialValue: 1
                 },
                 {
                   name: 'max',
@@ -299,7 +286,14 @@ export default defineType({
                   initialValue: 1
                 },
                 {
-                  name: 'pricePerUnitByTier',
+                  name: 'basePricePerUnit',
+                  title: 'Base Price Per Unit (₹)',
+                  type: 'number',
+                  description: 'Will auto-scale per tier',
+                  initialValue: 0
+                },
+                {
+                  name: 'priceByTier',
                   title: 'Price Per Unit (by Quantity Tier)',
                   type: 'array',
                   of: [
@@ -309,8 +303,7 @@ export default defineType({
                         {
                           name: 'tierLabel',
                           title: 'Quantity Tier',
-                          type: 'string',
-                          description: 'e.g., "1000", "2000"'
+                          type: 'string'
                         },
                         {
                           name: 'pricePerUnit',
@@ -326,11 +319,8 @@ export default defineType({
             }
           ]
         }
-      ],
-      description: 'Create options like Lamination (Yes/No), Corner Type (Rounded/Straight), Printing (Front/Front+Back). Each option value has prices that vary by quantity tier.'
+      ]
     }),
-
-    // ============ SPECIFICATIONS ============
     defineField({
       name: 'specifications',
       title: 'Specifications',
@@ -353,14 +343,11 @@ export default defineType({
         }
       ]
     }),
-
-    // ============ STATUS & ORDERING ============
     defineField({
       name: 'minOrderQuantity',
       title: 'Minimum Order Quantity',
       type: 'number',
-      initialValue: 1,
-      validation: (Rule) => Rule.required().min(1)
+      initialValue: 1
     }),
     defineField({
       name: 'sortOrder',
@@ -381,7 +368,6 @@ export default defineType({
       initialValue: false
     })
   ],
-  
   preview: {
     select: {
       title: 'name',
