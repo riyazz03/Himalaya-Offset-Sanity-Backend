@@ -129,18 +129,7 @@ export default defineType({
               description: 'e.g., "1000", "2000", "5000"',
               validation: (Rule) => Rule.required()
             },
-            {
-              name: 'minQuantity',
-              title: 'Minimum Quantity',
-              type: 'number',
-              validation: (Rule) => Rule.required().min(1)
-            },
-            {
-              name: 'maxQuantity',
-              title: 'Maximum Quantity',
-              type: 'number',
-              description: 'Leave empty for unlimited'
-            },
+
             {
               name: 'basePrice',
               title: 'Base Price Per Card',
