@@ -30,25 +30,17 @@ export default defineType({
           { title: 'On Hold', value: 'on_hold' }
         ]
       },
-      initialValue: 'pending',
+      initialValue: 'processing',
       validation: (Rule) => Rule.required()
     }),
 
     // Customer Information
     defineField({
-      name: 'customer',
-      title: 'Customer',
-      type: 'reference',
-      to: [{ type: 'user' }],
-      validation: (Rule) => Rule.required(),
-      description: 'Link to customer user profile'
-    }),
-
-    defineField({
       name: 'customerDetails',
-      title: 'Customer Details (Snapshot)',
+      title: 'Customer Details',
       type: 'object',
-      description: 'Snapshot of customer details at time of order',
+      validation: (Rule) => Rule.required(),
+      description: 'Customer details at time of order',
       fields: [
         {
           name: 'firstName',
@@ -110,20 +102,21 @@ export default defineType({
       ]
     }),
 
-    // Product Information
+    // Product Information - Reference to subcategory
     defineField({
       name: 'product',
       title: 'Product',
       type: 'reference',
       to: [{ type: 'subcategory' }],
-      validation: (Rule) => Rule.required(),
       description: 'Product ordered'
     }),
 
+    // Product Details Snapshot
     defineField({
       name: 'productSnapshot',
       title: 'Product Details (Snapshot)',
       type: 'object',
+      validation: (Rule) => Rule.required(),
       description: 'Product details at time of order',
       fields: [
         {
@@ -136,14 +129,6 @@ export default defineType({
           name: 'slug',
           title: 'Product Slug',
           type: 'string'
-        },
-        {
-          name: 'productImage',
-          title: 'Product Image',
-          type: 'image',
-          options: {
-            hotspot: true
-          }
         },
         {
           name: 'description',
@@ -193,11 +178,6 @@ export default defineType({
           name: 'savingsPercentage',
           title: 'Savings %',
           type: 'number'
-        },
-        {
-          name: 'badge',
-          title: 'Badge Text',
-          type: 'string'
         }
       ]
     }),
@@ -264,6 +244,24 @@ export default defineType({
           name: 'pricePerUnit',
           title: 'Price Per Unit (₹)',
           type: 'number'
+        },
+        {
+          name: 'gstAmount',
+          title: 'GST Amount (₹)',
+          type: 'number',
+          initialValue: 0
+        },
+        {
+          name: 'gstPercentage',
+          title: 'GST Percentage',
+          type: 'number',
+          initialValue: 18
+        },
+        {
+          name: 'finalTotal',
+          title: 'Final Total (₹)',
+          type: 'number',
+          description: 'Total including GST'
         },
         {
           name: 'discount',
@@ -335,7 +333,7 @@ export default defineType({
               { title: 'Refunded', value: 'refunded' }
             ]
           },
-          initialValue: 'pending'
+          initialValue: 'completed'
         },
         {
           name: 'amountPaid',
@@ -378,7 +376,7 @@ export default defineType({
               name: 'fileUrl',
               title: 'File URL',
               type: 'string',
-              description: 'URL to the uploaded file (from cloud storage)'
+              description: 'URL to the uploaded file'
             },
             {
               name: 'fileType',
@@ -395,15 +393,6 @@ export default defineType({
               name: 'uploadedAt',
               title: 'Uploaded At',
               type: 'datetime'
-            },
-            {
-              name: 'fileImage',
-              title: 'File Preview/Thumbnail',
-              type: 'image',
-              options: {
-                hotspot: true
-              },
-              description: 'Preview image for design files'
             }
           ]
         }
@@ -502,13 +491,13 @@ export default defineType({
       customerName: 'customerDetails.firstName',
       productName: 'productSnapshot.name',
       status: 'status',
-      amount: 'pricing.totalPrice',
+      amount: 'pricing.finalTotal',
       paymentStatus: 'payment.paymentStatus'
     },
     prepare({ orderId, customerName, productName, status, amount, paymentStatus }) {
       return {
         title: `Order #${orderId}`,
-        subtitle: `${customerName} - ${productName} (₹${amount})`,
+        subtitle: `${customerName} - ${productName} (₹${amount}) - ${paymentStatus}`,
         media: undefined
       }
     }
